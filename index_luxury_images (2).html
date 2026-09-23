@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#080807" />
+  <meta name="description" content="NOCTURNE — A cinematic fine-dining experience where fire, season and imagination become a symphony of flavors." />
+  <title>NOCTURNE — A Symphony of Flavors</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            ink: "#080807",
+            ivory: "#f1ede4",
+            champagne: "#c9a86a",
+            smoke: "#aaa49a",
+            charcoal: "#121210"
+          },
+          fontFamily: {
+            display: ["Cormorant Garamond", "serif"],
+            sans: ["Inter", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #080807;
+      --ivory: #f1ede4;
+      --gold: #c9a86a;
+      --muted: #aaa49a;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: auto;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ivory);
+      font-family: "Inter", sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    ::selection {
+      background: var(--gold);
+      color: #080807;
+    }
+
+    a,
+    button {
+      cursor: none;
+    }
+
+    #webgl {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: .72;
+    }
+
+    .page {
+      position: relative;
+      z-index: 2;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      pointer-events: none;
+      opacity: .035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+    }
+
+    .vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at center, transparent 20%, rgba(0,0,0,.12) 55%, rgba(0,0,0,.7) 100%);
+    }
+
+    .custom-cursor {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--ivory);
+      z-index: 100;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      mix-blend-mode: difference;
+    }
+
+    .cursor-ring {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(241,237,228,.7);
+      border-radius: 999px;
+      z-index: 99;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      mix-blend-mode: difference;
+    }
+
+    .cursor-label {
+      position: fixed;
+      left: 0;
+      top: 0;
+      color: var(--ivory);
+      font-size: 8px;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      z-index: 101;
+      pointer-events: none;
+      opacity: 0;
+      transform: translate(15px, 15px);
+      white-space: nowrap;
+    }
+
+    .eyebrow {
+      font-size: 9px;
+      line-height: 1;
+      letter-spacing: .36em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .hairline {
+      height: 1px;
+      background: rgba(241,237,228,.16);
+      transform-origin: left center;
+    }
+
+    .hero-title {
+      font-family: "Cormorant Garamond", serif;
+      font-weight: 300;
+      font-size: clamp(4.5rem, 13vw, 13rem);
+      line-height: .72;
+      letter-spacing: -.055em;
+    }
+
+    .hero-title .outline {
+      color: transparent;
+      -webkit-text-stroke: 1px rgba(241,237,228,.68);
+    }
+
+    .serif {
+      font-family: "Cormorant Garamond", serif;
+    }
+
+    .gold-line {
+      position: relative;
+    }
+
+    .gold-line::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: -7px;
+      width: 100%;
+      height: 1px;
+      background: var(--gold);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform .6s cubic-bezier(.22,1,.36,1);
+    }
+
+    .gold-line:hover::after {
+      transform: scaleX(1);
+    }
+
+    .marquee {
+      overflow: hidden;
+      border-top: 1px solid rgba(241,237,228,.13);
+      border-bottom: 1px solid rgba(241,237,228,.13);
+    }
+
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marquee 28s linear infinite;
+    }
+
+    .marquee-item {
+      display: flex;
+      align-items: center;
+      gap: 42px;
+      padding-right: 42px;
+      white-space: nowrap;
+    }
+
+    .marquee-item span {
+      font-family: "Cormorant Garamond", serif;
+      font-size: clamp(2.2rem, 4vw, 4.8rem);
+      font-weight: 300;
+      font-style: italic;
+    }
+
+    .marquee-item i {
+      color: var(--gold);
+      font-style: normal;
+      font-size: 10px;
+    }
+
+    @keyframes marquee {
+      to {
+        transform: translateX(-50%);
+      }
+    }
+
+    .menu-card {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(241,237,228,.14);
+      background: rgba(18,18,16,.58);
+      backdrop-filter: blur(12px);
+      transition: border-color .5s ease, transform .5s cubic-bezier(.22,1,.36,1);
+    }
+
+    .menu-card-image {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: .34;
+      filter: brightness(.52) contrast(1.08) saturate(.72);
+      transform: scale(1.045);
+      transition: transform 1.2s cubic-bezier(.22,1,.36,1), opacity .8s ease, filter .8s ease;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .menu-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(5,5,4,.74) 0%, rgba(5,5,4,.22) 43%, rgba(5,5,4,.88) 100%);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .menu-card > div:not(.menu-card-image) {
+      position: relative;
+      z-index: 2;
+    }
+
+    .menu-card:hover .menu-card-image {
+      transform: scale(1.11);
+      opacity: .46;
+      filter: brightness(.58) contrast(1.08) saturate(.82);
+    }
+
+    .menu-card:hover {
+      border-color: rgba(201,168,106,.7);
+      transform: translateY(-8px);
+    }
+
+    .menu-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(201,168,106,.08), transparent 42%);
+      opacity: 0;
+      transition: opacity .5s ease;
+    }
+
+    .menu-card:hover::before {
+      opacity: 1;
+    }
+
+    .dish-number {
+      font-size: 9px;
+      letter-spacing: .22em;
+      color: var(--gold);
+    }
+
+    .reservation-button {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .reservation-button::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: var(--ivory);
+      transform: translateY(101%);
+      transition: transform .65s cubic-bezier(.22,1,.36,1);
+      z-index: -1;
+    }
+
+    .reservation-button:hover::before {
+      transform: translateY(0);
+    }
+
+    .reservation-button:hover {
+      color: #080807;
+    }
+
+    .image-frame {
+      position: relative;
+      overflow: hidden;
+      background: #111;
+    }
+
+    .image-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(.65) contrast(1.08);
+      transform: scale(1.03);
+      transition: transform 1.2s cubic-bezier(.22,1,.36,1), filter 1.2s ease;
+    }
+
+    .image-frame:hover img {
+      transform: scale(1.1);
+      filter: saturate(.9) contrast(1.08);
+    }
+
+    .image-frame::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,.55));
+      pointer-events: none;
+    }
+
+    .vertical-text {
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+    }
+
+    .split-word {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: bottom;
+    }
+
+    .split-word > span {
+      display: inline-block;
+      transform: translateY(110%);
+    }
+
+    .section-number {
+      font-size: 9px;
+      letter-spacing: .2em;
+      color: rgba(241,237,228,.4);
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(45px);
+    }
+
+    .luxury-grid {
+      background-image:
+        linear-gradient(rgba(241,237,228,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(241,237,228,.035) 1px, transparent 1px);
+      background-size: 90px 90px;
+    }
+
+    .gold-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 16px rgba(201,168,106,.8);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        cursor: auto;
+      }
+
+      .custom-cursor,
+      .cursor-ring,
+      .cursor-label {
+        display: none;
+      }
+
+      #webgl {
+        opacity: .48;
+      }
+
+      .hero-title {
+        font-size: clamp(4rem, 21vw, 7rem);
+        line-height: .76;
+      }
+
+      .marquee-track {
+        animation-duration: 20s;
+      }
+
+      .marquee-item {
+        gap: 25px;
+        padding-right: 25px;
+      }
+
+      .menu-card:hover {
+        transform: none;
+      }
+
+      .luxury-grid {
+        background-size: 55px 55px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+
+      #webgl {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="webgl" aria-hidden="true"></div>
+  <div class="vignette"></div>
+  <div class="noise"></div>
+
+  <div class="custom-cursor"></div>
+  <div class="cursor-ring"></div>
+  <div class="cursor-label">Explore</div>
+
+  <main class="page">
+
+    <!-- NAVIGATION -->
+    <header class="fixed top-0 left-0 right-0 z-50 px-5 md:px-10 py-6">
+      <nav class="flex items-center justify-between">
+        <a href="#top" class="group flex items-center gap-3" data-cursor="Home">
+          <span class="gold-dot"></span>
+          <span class="text-[11px] tracking-[.32em] font-medium">NOCTURNE</span>
+        </a>
+
+        <div class="hidden md:flex items-center gap-10">
+          <a href="#story" class="gold-line text-[9px] tracking-[.25em] uppercase text-white/70 hover:text-white transition" data-cursor="Story">The Story</a>
+          <a href="#menu" class="gold-line text-[9px] tracking-[.25em] uppercase text-white/70 hover:text-white transition" data-cursor="Menu">Menu</a>
+          <a href="#atelier" class="gold-line text-[9px] tracking-[.25em] uppercase text-white/70 hover:text-white transition" data-cursor="Atelier">Atelier</a>
+        </div>
+
+        <a href="#reserve" class="border border-white/30 px-5 py-3 text-[9px] tracking-[.25em] uppercase hover:border-[#c9a86a] transition" data-cursor="Reserve">
+          Reserve
+        </a>
+      </nav>
+    </header>
+
+    <!-- HERO -->
+    <section id="top" class="min-h-screen relative flex items-center px-5 md:px-10 pt-24">
+      <div class="absolute inset-0 luxury-grid opacity-40 pointer-events-none"></div>
+
+      <div class="w-full max-w-[1600px] mx-auto relative">
+        <div class="flex justify-between items-end mb-12 md:mb-20">
+          <div class="eyebrow hero-reveal">Est. 2014 · Paris / Tokyo / Everywhere</div>
+          <div class="hidden md:block section-number hero-reveal">01 / 05</div>
+        </div>
+
+        <div class="overflow-hidden">
+          <h1 class="hero-title uppercase">
+            <span class="block hero-word">Nocturne</span>
+            <span class="block hero-word ml-[7vw] md:ml-[12vw]"><span class="outline">Dining</span></span>
+          </h1>
+        </div>
+
+        <div class="mt-14 md:mt-20 grid md:grid-cols-12 gap-8 items-end">
+          <div class="md:col-span-4 md:col-start-8 hero-reveal">
+            <div class="hairline mb-6"></div>
+            <p class="text-sm md:text-base text-white/65 leading-relaxed font-light">
+              An intimate study of fire, season and imagination.
+              A dining room where the night becomes an ingredient
+              and every plate tells a story.
+            </p>
+            <a href="#story" class="inline-flex items-center gap-4 mt-8 group" data-cursor="Discover">
+              <span class="text-[9px] uppercase tracking-[.3em]">Discover Nocturne</span>
+              <span class="w-10 h-px bg-[#c9a86a] group-hover:w-16 transition-all duration-500"></span>
+            </a>
+          </div>
+
+          <div class="md:col-span-2 md:col-start-1 hero-reveal hidden md:block">
+            <div class="vertical-text text-[8px] tracking-[.35em] text-white/35 uppercase">
+              A symphony of flavors · A nocturnal ritual
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="absolute bottom-8 left-5 md:left-10 flex items-center gap-4 hero-reveal">
+        <span class="w-8 h-px bg-white/30"></span>
+        <span class="text-[8px] tracking-[.3em] uppercase text-white/35">Scroll to enter</span>
+      </div>
+    </section>
+
+    <!-- MARQUEE -->
+    <section class="marquee py-5 relative z-10">
+      <div class="marquee-track">
+        <div class="marquee-item">
+          <span>Fire</span><i>✦</i>
+          <span>Season</span><i>✦</i>
+          <span>Memory</span><i>✦</i>
+          <span>Wonder</span><i>✦</i>
+          <span>Fire</span><i>✦</i>
+          <span>Season</span><i>✦</i>
+          <span>Memory</span><i>✦</i>
+          <span>Wonder</span><i>✦</i>
+        </div>
+        <div class="marquee-item" aria-hidden="true">
+          <span>Fire</span><i>✦</i>
+          <span>Season</span><i>✦</i>
+          <span>Memory</span><i>✦</i>
+          <span>Wonder</span><i>✦</i>
+          <span>Fire</span><i>✦</i>
+          <span>Season</span><i>✦</i>
+          <span>Memory</span><i>✦</i>
+          <span>Wonder</span><i>✦</i>
+        </div>
+      </div>
+    </section>
+
+    <!-- STORY -->
+    <section id="story" class="py-32 md:py-52 px-5 md:px-10">
+      <div class="max-w-[1600px] mx-auto">
+        <div class="grid md:grid-cols-12 gap-10">
+          <div class="md:col-span-2">
+            <span class="section-number">02 / 05</span>
+            <div class="hidden md:block mt-10 vertical-text eyebrow">The philosophy</div>
+          </div>
+
+          <div class="md:col-span-8 md:col-start-4">
+            <div class="eyebrow reveal">The philosophy</div>
+            <h2 class="serif text-[clamp(3.5rem,7vw,8rem)] leading-[.82] font-light mt-7 reveal">
+              Where darkness<br>
+              <em class="text-[#c9a86a]">reveals</em> flavor.
+            </h2>
+
+            <div class="grid md:grid-cols-2 gap-12 mt-20">
+              <p class="text-sm md:text-base text-white/55 leading-[1.9] font-light reveal">
+                Nocturne was born from a simple obsession: to make dining feel
+                like discovering something forbidden after midnight.
+                Our kitchen follows no calendar except nature's.
+              </p>
+              <p class="text-sm md:text-base text-white/55 leading-[1.9] font-light reveal">
+                Ingredients arrive at their peak, fire becomes our oldest tool,
+                and restraint becomes our most powerful technique. The result
+                is a menu that changes with the world outside our doors.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURE IMAGE / EXPERIENCE -->
+    <section id="atelier" class="px-5 md:px-10 pb-32 md:pb-52">
+      <div class="max-w-[1600px] mx-auto">
+        <div class="grid md:grid-cols-12 gap-6 items-stretch">
+          <div class="md:col-span-8 image-frame aspect-[4/3] md:aspect-[16/10] reveal" data-cursor="The Kitchen">
+            <img
+              src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1800&q=85"
+              alt="Elegant fine dining table in a dark atmospheric restaurant"
+              loading="lazy"
+            />
+            <div class="absolute left-6 md:left-10 bottom-7 md:bottom-10 z-10">
+              <div class="eyebrow mb-3">The dining room</div>
+              <div class="serif text-3xl md:text-5xl font-light">An intimate darkness.</div>
+            </div>
+          </div>
+
+          <div class="md:col-span-4 flex flex-col justify-between border border-white/10 p-7 md:p-10 reveal">
+            <div>
+              <span class="section-number">ATELIER / 001</span>
+              <h3 class="serif text-4xl md:text-5xl font-light mt-16">
+                Five senses.<br>
+                One memory.
+              </h3>
+            </div>
+
+            <div class="mt-16">
+              <div class="hairline mb-6"></div>
+              <p class="text-xs leading-[1.8] text-white/45">
+                28 seats. One open kitchen. No distractions.
+                Every detail is designed to bring the table closer
+                to the theatre of the plate.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MENU -->
+    <section id="menu" class="py-32 md:py-48 px-5 md:px-10 border-y border-white/10">
+      <div class="max-w-[1600px] mx-auto">
+        <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-10 mb-20">
+          <div>
+            <div class="eyebrow reveal">The tasting menu</div>
+            <h2 class="serif text-[clamp(4rem,8vw,9rem)] leading-[.8] font-light mt-6 reveal">
+              After<br><em class="text-[#c9a86a]">Dark.</em>
+            </h2>
+          </div>
+
+          <div class="md:max-w-sm reveal">
+            <p class="text-sm text-white/50 leading-[1.8]">
+              Twelve moments. Three hours. An ever-changing expression
+              of the season, composed nightly by Chef Elias Laurent.
+            </p>
+            <div class="mt-7 text-[9px] tracking-[.25em] uppercase text-white/35">
+              240 € · Wine pairing 180 €
+            </div>
+          </div>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-px bg-white/10">
+          <article class="menu-card p-7 md:p-12 reveal" data-cursor="01">
+            <img class="menu-card-image" src="https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1800&q=90" alt="Black Garlic" loading="lazy" decoding="async">
+            <div class="flex justify-between">
+              <span class="dish-number">01 — 12</span>
+              <span class="text-[9px] uppercase tracking-[.2em] text-white/25">Amuse</span>
+            </div>
+            <div class="mt-24">
+              <h3 class="serif text-4xl md:text-5xl font-light">Black Garlic</h3>
+              <p class="mt-4 text-xs text-white/40">Smoked potato · fermented honey · alpine herbs</p>
+            </div>
+          </article>
+
+          <article class="menu-card p-7 md:p-12 reveal" data-cursor="02">
+            <img class="menu-card-image" src="https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=1800&q=90" alt="Wild Scallop" loading="lazy" decoding="async">
+            <div class="flex justify-between">
+              <span class="dish-number">02 — 12</span>
+              <span class="text-[9px] uppercase tracking-[.2em] text-white/25">Ocean</span>
+            </div>
+            <div class="mt-24">
+              <h3 class="serif text-4xl md:text-5xl font-light">Wild Scallop</h3>
+              <p class="mt-4 text-xs text-white/40">Sea buckthorn · champagne beurre blanc · caviar</p>
+            </div>
+          </article>
+
+          <article class="menu-card p-7 md:p-12 reveal" data-cursor="03">
+            <img class="menu-card-image" src="https://images.unsplash.com/photo-1540420773420-3366772f4999?auto=format&fit=crop&w=1800&q=90" alt="Ember-Roasted Celery" loading="lazy" decoding="async">
+            <div class="flex justify-between">
+              <span class="dish-number">03 — 12</span>
+              <span class="text-[9px] uppercase tracking-[.2em] text-white/25">Fire</span>
+            </div>
+            <div class="mt-24">
+              <h3 class="serif text-4xl md:text-5xl font-light">Ember-Roasted Celery</h3>
+              <p class="mt-4 text-xs text-white/40">Hazelnut · aged comté · truffle smoke</p>
+            </div>
+          </article>
+
+          <article class="menu-card p-7 md:p-12 reveal" data-cursor="04">
+            <img class="menu-card-image" src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=1800&q=90" alt="Duck à la Flamme" loading="lazy" decoding="async">
+            <div class="flex justify-between">
+              <span class="dish-number">04 — 12</span>
+              <span class="text-[9px] uppercase tracking-[.2em] text-white/25">Signature</span>
+            </div>
+            <div class="mt-24">
+              <h3 class="serif text-4xl md:text-5xl font-light">Duck à la Flamme</h3>
+              <p class="mt-4 text-xs text-white/40">Black plum · juniper · lacquered jus</p>
+            </div>
+          </article>
+
+          <article class="menu-card p-7 md:p-12 reveal" data-cursor="05">
+            <img class="menu-card-image" src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?auto=format&fit=crop&w=1800&q=90" alt="Winter Garden" loading="lazy" decoding="async">
+            <div class="flex justify-between">
+              <span class="dish-number">05 — 12</span>
+              <span class="text-[9px] uppercase tracking-[.2em] text-white/25">Garden</span>
+            </div>
+            <div class="mt-24">
+              <h3 class="serif text-4xl md:text-5xl font-light">Winter Garden</h3>
+              <p class="mt-4 text-xs text-white/40">Pear · violet leaf · roasted seeds · snow</p>
+            </div>
+          </article>
+
+          <article class="menu-card p-7 md:p-12 reveal" data-cursor="06">
+            <img class="menu-card-image" src="https://images.unsplash.com/photo-1575377427642-087cf684f29d?auto=format&fit=crop&w=1800&q=90" alt="Midnight Chocolate" loading="lazy" decoding="async">
+            <div class="flex justify-between">
+              <span class="dish-number">06 — 12</span>
+              <span class="text-[9px] uppercase tracking-[.2em] text-white/25">Finale</span>
+            </div>
+            <div class="mt-24">
+              <h3 class="serif text-4xl md:text-5xl font-light">Midnight Chocolate</h3>
+              <p class="mt-4 text-xs text-white/40">70% cacao · burnt vanilla · olive oil · salt</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUOTE -->
+    <section class="py-40 md:py-64 px-5 md:px-10">
+      <div class="max-w-6xl mx-auto text-center">
+        <div class="gold-dot mx-auto mb-10 reveal"></div>
+        <blockquote class="serif text-[clamp(3rem,7vw,7rem)] leading-[.88] font-light reveal">
+          “The best meals don't<br>
+          fill the stomach.<br>
+          <em class="text-[#c9a86a]">They haunt the memory.</em>”
+        </blockquote>
+        <div class="eyebrow mt-12 reveal">— Chef Elias Laurent</div>
+      </div>
+    </section>
+
+    <!-- RESERVATION -->
+    <section id="reserve" class="py-32 md:py-48 px-5 md:px-10 border-t border-white/10">
+      <div class="max-w-[1600px] mx-auto">
+        <div class="grid md:grid-cols-12 gap-12">
+          <div class="md:col-span-7">
+            <div class="eyebrow reveal">Reservations</div>
+            <h2 class="serif text-[clamp(4rem,9vw,10rem)] leading-[.76] font-light mt-8 reveal">
+              Your table<br>
+              <span class="text-[#c9a86a] italic">awaits.</span>
+            </h2>
+          </div>
+
+          <div class="md:col-span-4 md:col-start-9 flex flex-col justify-end">
+            <p class="text-sm text-white/50 leading-[1.8] reveal">
+              Reservations open 60 days in advance.
+              For parties of seven or more, our private dining team
+              will create a bespoke evening around your table.
+            </p>
+
+            <a
+              href="mailto:reservations@nocturne.example?subject=Reservation%20Request"
+              class="reservation-button border border-white/30 mt-10 px-7 py-5 flex items-center justify-between group reveal"
+              data-cursor="Book"
+            >
+              <span class="text-[9px] tracking-[.3em] uppercase">Request a table</span>
+              <span class="text-lg transition-transform duration-500 group-hover:translate-x-2">↗</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="px-5 md:px-10 pt-20 pb-8 border-t border-white/10">
+      <div class="max-w-[1600px] mx-auto">
+        <div class="grid md:grid-cols-12 gap-12">
+          <div class="md:col-span-5">
+            <div class="flex items-center gap-3">
+              <span class="gold-dot"></span>
+              <span class="text-[11px] tracking-[.32em]">NOCTURNE</span>
+            </div>
+            <p class="serif text-3xl md:text-4xl font-light mt-8 text-white/65">
+              A symphony of flavors,<br>
+              composed after dark.
+            </p>
+          </div>
+
+          <div class="md:col-span-2 md:col-start-7">
+            <div class="eyebrow mb-6">Visit</div>
+            <p class="text-xs leading-[2] text-white/45">
+              17 Rue des Lumières<br>
+              75001 Paris, France<br>
+              <span class="text-white/25">By reservation only</span>
+            </p>
+          </div>
+
+          <div class="md:col-span-2">
+            <div class="eyebrow mb-6">Contact</div>
+            <a href="mailto:reservations@nocturne.example" class="block text-xs text-white/45 hover:text-white transition mb-3">
+              reservations@nocturne.example
+            </a>
+            <a href="tel:+33142880000" class="block text-xs text-white/45 hover:text-white transition">
+              +33 1 42 88 00 00
+            </a>
+          </div>
+
+          <div class="md:col-span-1">
+            <div class="eyebrow mb-6">Social</div>
+            <a href="#" class="block text-xs text-white/45 hover:text-white transition mb-3" data-cursor="Instagram">Instagram</a>
+            <a href="#" class="block text-xs text-white/45 hover:text-white transition" data-cursor="Journal">Journal</a>
+          </div>
+        </div>
+
+        <div class="hairline mt-20 mb-6"></div>
+
+        <div class="flex flex-col md:flex-row justify-between gap-4 text-[8px] tracking-[.2em] uppercase text-white/25">
+          <span>© 2026 Nocturne Dining Atelier</span>
+          <span>Paris · Tokyo · Everywhere</span>
+          <span>Made for the night</span>
+        </div>
+      </div>
+    </footer>
+  </main>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+    (() => {
+      "use strict";
+
+      /* ============================================================
+         THREE.JS — CINEMATIC PARTICLE FIELD
+         Desktop: richer field
+         Mobile: reduced particle count + lower pixel ratio
+      ============================================================ */
+
+      const container = document.getElementById("webgl");
+      const isMobile = window.matchMedia("(max-width: 768px)").matches;
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (!reducedMotion) {
+        const scene = new THREE.Scene();
+
+        const camera = new THREE.PerspectiveCamera(
+          55,
+          window.innerWidth / window.innerHeight,
+          0.1,
+          100
+        );
+
+        camera.position.z = isMobile ? 10 : 8;
+
+        const renderer = new THREE.WebGLRenderer({
+          antialias: !isMobile,
+          alpha: true,
+          powerPreference: isMobile ? "low-power" : "high-performance"
+        });
+
+        renderer.setPixelRatio(
+          Math.min(window.devicePixelRatio, isMobile ? 1 : 1.6)
+        );
+
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        container.appendChild(renderer.domElement);
+
+        const particleCount = isMobile ? 850 : 2800;
+        const positions = new Float32Array(particleCount * 3);
+        const scales = new Float32Array(particleCount);
+
+        for (let i = 0; i < particleCount; i++) {
+          const radius = isMobile
+            ? 7 + Math.random() * 9
+            : 5 + Math.random() * 13;
+
+          const theta = Math.random() * Math.PI * 2;
+          const phi = Math.acos((Math.random() * 2) - 1);
+
+          positions[i * 3] =
+            Math.sin(phi) * Math.cos(theta) * radius;
+
+          positions[i * 3 + 1] =
+            Math.sin(phi) * Math.sin(theta) * radius;
+
+          positions[i * 3 + 2] =
+            Math.cos(phi) * radius;
+
+          scales[i] = Math.random();
+        }
+
+        const geometry = new THREE.BufferGeometry();
+
+        geometry.setAttribute(
+          "position",
+          new THREE.BufferAttribute(positions, 3)
+        );
+
+        geometry.setAttribute(
+          "aScale",
+          new THREE.BufferAttribute(scales, 1)
+        );
+
+        const material = new THREE.ShaderMaterial({
+          transparent: true,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+          uniforms: {
+            uTime: { value: 0 },
+            uPixelRatio: {
+              value: Math.min(window.devicePixelRatio, isMobile ? 1 : 1.6)
+            }
+          },
+          vertexShader: `
+            uniform float uTime;
+            uniform float uPixelRatio;
+
+            attribute float aScale;
+
+            varying float vAlpha;
+
+            void main() {
+              vec3 p = position;
+
+              float wave1 = sin(p.x * 0.34 + uTime * 0.14);
+              float wave2 = cos(p.y * 0.28 + uTime * 0.11);
+              float wave3 = sin(p.z * 0.22 + uTime * 0.09);
+
+              p.x += wave2 * 0.18;
+              p.y += wave1 * 0.22;
+              p.z += wave3 * 0.16;
+
+              vec4 mvPosition = modelViewMatrix * vec4(p, 1.0);
+
+              float distanceScale = 100.0 / -mvPosition.z;
+
+              gl_PointSize =
+                (0.8 + aScale * 1.9) *
+                uPixelRatio *
+                distanceScale;
+
+              gl_Position = projectionMatrix * mvPosition;
+
+              vAlpha = 0.18 + aScale * 0.5;
+            }
+          `,
+          fragmentShader: `
+            varying float vAlpha;
+
+            void main() {
+              vec2 uv = gl_PointCoord - 0.5;
+              float d = length(uv);
+
+              float glow = smoothstep(0.5, 0.0, d);
+
+              vec3 warm = vec3(0.78, 0.62, 0.34);
+
+              gl_FragColor = vec4(
+                warm,
+                glow * vAlpha
+              );
+            }
+          `
+        });
+
+        const particles = new THREE.Points(geometry, material);
+        scene.add(particles);
+
+        const ambientGeometry = new THREE.SphereGeometry(
+          isMobile ? 2.6 : 3.5,
+          isMobile ? 24 : 48,
+          isMobile ? 24 : 48
+        );
+
+        const ambientMaterial = new THREE.ShaderMaterial({
+          transparent: true,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+          uniforms: {
+            uTime: { value: 0 }
+          },
+          vertexShader: `
+            varying vec3 vPosition;
+
+            void main() {
+              vPosition = position;
+              gl_Position = projectionMatrix *
+                            modelViewMatrix *
+                            vec4(position, 1.0);
+            }
+          `,
+          fragmentShader: `
+            uniform float uTime;
+            varying vec3 vPosition;
+
+            void main() {
+              float r = length(vPosition.xy) / 3.5;
+              float glow = 1.0 - smoothstep(0.15, 1.0, r);
+
+              vec3 color = vec3(
+                0.22 + glow * 0.18,
+                0.13 + glow * 0.08,
+                0.055
+              );
+
+              gl_FragColor = vec4(color, glow * 0.09);
+            }
+          `
+        });
+
+        const ambientSphere = new THREE.Mesh(
+          ambientGeometry,
+          ambientMaterial
+        );
+
+        ambientSphere.position.set(0, 0, -4);
+        scene.add(ambientSphere);
+
+        const mouse = {
+          x: 0,
+          y: 0,
+          tx: 0,
+          ty: 0
+        };
+
+        window.addEventListener("pointermove", (event) => {
+          mouse.tx =
+            (event.clientX / window.innerWidth - 0.5) * 2;
+
+          mouse.ty =
+            (event.clientY / window.innerHeight - 0.5) * 2;
+        }, { passive: true });
+
+        let frame = 0;
+
+        function animate(time) {
+          frame = requestAnimationFrame(animate);
+
+          const t = time * 0.001;
+
+          material.uniforms.uTime.value = t;
+          ambientMaterial.uniforms.uTime.value = t;
+
+          mouse.x += (mouse.tx - mouse.x) * 0.025;
+          mouse.y += (mouse.ty - mouse.y) * 0.025;
+
+          particles.rotation.y += isMobile ? 0.00015 : 0.00035;
+          particles.rotation.x += isMobile ? 0.00005 : 0.00012;
+
+          particles.rotation.y += mouse.x * 0.0007;
+          particles.rotation.x += mouse.y * 0.0004;
+
+          ambientSphere.rotation.y = t * 0.025;
+
+          renderer.render(scene, camera);
+        }
+
+        animate(0);
+
+        let resizeTimer;
+
+        window.addEventListener("resize", () => {
+          clearTimeout(resizeTimer);
+
+          resizeTimer = setTimeout(() => {
+            camera.aspect =
+              window.innerWidth / window.innerHeight;
+
+            camera.updateProjectionMatrix();
+
+            renderer.setPixelRatio(
+              Math.min(
+                window.devicePixelRatio,
+                isMobile ? 1 : 1.6
+              )
+            );
+
+            renderer.setSize(
+              window.innerWidth,
+              window.innerHeight
+            );
+          }, 100);
+        });
+      }
+
+      /* ============================================================
+         GSAP — CINEMATIC MOTION SYSTEM
+      ============================================================ */
+
+      if (typeof gsap !== "undefined" && typeof ScrollTrigger !== "undefined") {
+        gsap.registerPlugin(ScrollTrigger);
+
+        const prefersReducedMotion =
+          window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        if (!prefersReducedMotion) {
+          const heroTimeline = gsap.timeline({
+            defaults: {
+              ease: "power4.out"
+            }
+          });
+
+          heroTimeline
+            .from(".hero-word", {
+              yPercent: 110,
+              duration: 1.6,
+              stagger: 0.12
+            })
+            .from(".hero-reveal", {
+              y: 25,
+              opacity: 0,
+              duration: 1,
+              stagger: 0.08
+            }, "-=1")
+            .from(".hero-title", {
+              letterSpacing: "-0.02em",
+              duration: 1.5
+            }, "-=1.2");
+
+          gsap.utils.toArray(".reveal").forEach((element) => {
+            gsap.fromTo(
+              element,
+              {
+                y: 55,
+                opacity: 0
+              },
+              {
+                y: 0,
+                opacity: 1,
+                duration: 1.15,
+                ease: "power3.out",
+                scrollTrigger: {
+                  trigger: element,
+                  start: "top 88%",
+                  toggleActions: "play none none reverse"
+                }
+              }
+            );
+          });
+
+          gsap.to("#webgl", {
+            yPercent: -8,
+            ease: "none",
+            scrollTrigger: {
+              trigger: document.body,
+              start: "top top",
+              end: "bottom bottom",
+              scrub: 1.2
+            }
+          });
+
+          gsap.to(".hero-title", {
+            yPercent: 30,
+            opacity: 0.35,
+            ease: "none",
+            scrollTrigger: {
+              trigger: "#top",
+              start: "top top",
+              end: "bottom top",
+              scrub: 1
+            }
+          });
+
+          gsap.utils.toArray(".image-frame img").forEach((image) => {
+            gsap.to(image, {
+              yPercent: 7,
+              scale: 1.08,
+              ease: "none",
+              scrollTrigger: {
+                trigger: image.closest(".image-frame"),
+                start: "top bottom",
+                end: "bottom top",
+                scrub: 1.2
+              }
+            });
+          });
+
+          gsap.utils.toArray(".menu-card").forEach((card, index) => {
+            gsap.fromTo(
+              card,
+              {
+                y: index % 2 === 0 ? 70 : 110,
+                opacity: 0
+              },
+              {
+                y: 0,
+                opacity: 1,
+                duration: 1.1,
+                delay: (index % 2) * 0.08,
+                ease: "power3.out",
+                scrollTrigger: {
+                  trigger: card,
+                  start: "top 90%",
+                  toggleActions: "play none none reverse"
+                }
+              }
+            );
+          });
+
+          gsap.to(".marquee-track", {
+            xPercent: -10,
+            ease: "none",
+            scrollTrigger: {
+              trigger: ".marquee",
+              start: "top bottom",
+              end: "bottom top",
+              scrub: 1
+            }
+          });
+
+          ScrollTrigger.refresh();
+        }
+      }
+
+      /* ============================================================
+         CUSTOM CURSOR
+      ============================================================ */
+
+      if (!isMobile && !reducedMotion) {
+        const cursor = document.querySelector(".custom-cursor");
+        const ring = document.querySelector(".cursor-ring");
+        const label = document.querySelector(".cursor-label");
+
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let ringX = mouseX;
+        let ringY = mouseY;
+
+        window.addEventListener("pointermove", (event) => {
+          mouseX = event.clientX;
+          mouseY = event.clientY;
+
+          gsap.set(cursor, {
+            x: mouseX,
+            y: mouseY
+          });
+
+          const target = event.target.closest("[data-cursor]");
+
+          if (target) {
+            const text = target.getAttribute("data-cursor");
+
+            label.textContent = text;
+
+            gsap.to(ring, {
+              width: 72,
+              height: 72,
+              duration: .35,
+              ease: "power3.out"
+            });
+
+            gsap.to(label, {
+              opacity: 1,
+              duration: .25
+            });
+          } else {
+            gsap.to(ring, {
+              width: 38,
+              height: 38,
+              duration: .35,
+              ease: "power3.out"
+            });
+
+            gsap.to(label, {
+              opacity: 0,
+              duration: .2
+            });
+          }
+        }, { passive: true });
+
+        function cursorLoop() {
+          ringX += (mouseX - ringX) * 0.14;
+          ringY += (mouseY - ringY) * 0.14;
+
+          gsap.set(ring, {
+            x: ringX,
+            y: ringY
+          });
+
+          gsap.set(label, {
+            x: mouseX,
+            y: mouseY
+          });
+
+          requestAnimationFrame(cursorLoop);
+        }
+
+        cursorLoop();
+      }
+
+      /* ============================================================
+         SMOOTH ANCHOR NAVIGATION
+      ============================================================ */
+
+      document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+        anchor.addEventListener("click", (event) => {
+          const id = anchor.getAttribute("href");
+
+          if (!id || id === "#") return;
+
+          const target = document.querySelector(id);
+
+          if (!target) return;
+
+          event.preventDefault();
+
+          const offset = window.innerWidth <= 768 ? 30 : 60;
+
+          window.scrollTo({
+            top: target.getBoundingClientRect().top +
+                 window.scrollY -
+                 offset,
+            behavior: "smooth"
+          });
+        });
+      });
+
+      /* ============================================================
+         IMAGE FALLBACK
+      ============================================================ */
+
+      document.querySelectorAll("img").forEach((img) => {
+        img.addEventListener("error", () => {
+          img.style.background =
+            "linear-gradient(135deg, #161411, #080807)";
+          img.removeAttribute("src");
+        });
+      });
+
+    })();
+  </script>
+</body>
+</html>
